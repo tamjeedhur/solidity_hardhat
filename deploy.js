@@ -1,10 +1,16 @@
 const ethers = require('ethers');
 const fs = require('fs-extra');
+require('dotenv').config();
 
 async function main() {
-  // http://127.0.0.1:7545
-  const provider = new ethers.providers.JsonRpcProvider('http://127.0.0.1:7545');
-  const wallet = new ethers.Wallet('2a016b54e69c7d252ac34d2ac5cf26c379a433f50d0d916570a085eec6c72e38', provider);
+  const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL);
+  //   const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
+
+  const encryptedJson = fs.readFileSync('./.encrypted.json', 'utf-8');
+
+  let wallet = new ethers.Wallet.fromEncryptedJsonSync(encryptedJson, process.env.PRIVATE_KEY_PASSWORD);
+  wallet = await wallet.connect(provider);
+
   const abi = fs.readFileSync('./SimpleStorage_sol_SimpleStorage.abi', 'utf8');
   const binary = fs.readFileSync('SimpleStorage_sol_SimpleStorage.bin', 'utf-8');
 
@@ -13,7 +19,7 @@ async function main() {
 
   const contract = await contractFactory.deploy();
   //   console.log(contract);
-    const transactionReceipt = await contract.deployTransaction.wait(1);
+  //   const transactionReceipt = await contract.deployTransaction.wait(1);
   //   console.log('here is the deployment transaction :', contract.deployTransaction);
 
   //   console.log('here is the transaction receipt :', transactionReceipt);
@@ -34,7 +40,16 @@ async function main() {
 
   const currentFavouriteNumber = await contract.retreive();
 
-  console.log(currentFavouriteNumber);
+  console.log(currentFavouriteNumber.toString());
+
+  const updateFavouriteNumber = await contract.store(6);
+  let updateFavouriteNumberReciept = await updateFavouriteNumber.wait();
+
+  console.log(updateFavouriteNumberReciept);
+
+  const updatdFavouriteNumber = await contract.retreive();
+
+  console.log(updatdFavouriteNumber.toString());
 }
 
 main()
