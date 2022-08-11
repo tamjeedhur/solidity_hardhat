@@ -6,21 +6,24 @@ async function main() {
   const provider = new ethers.providers.JsonRpcProvider(process.env.RPC_URL);
   //   const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
 
-  const encryptedJson = fs.readFileSync('./.encrypted.json', 'utf-8');
+  // const encryptedJson = fs.readFileSync('./.encrypted.json', 'utf8');
 
-  let wallet = new ethers.Wallet.fromEncryptedJsonSync(encryptedJson, process.env.PRIVATE_KEY_PASSWORD);
-  wallet = await wallet.connect(provider);
+  // let wallet = new ethers.Wallet.fromEncryptedJsonSync(encryptedJson, process.env.PRIVATE_KEY_PASSWORD);
+  // wallet = await wallet.connect(provider);
+
+  let wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
 
   const abi = fs.readFileSync('./SimpleStorage_sol_SimpleStorage.abi', 'utf8');
-  const binary = fs.readFileSync('SimpleStorage_sol_SimpleStorage.bin', 'utf-8');
+  const binary = fs.readFileSync('SimpleStorage_sol_SimpleStorage.bin', 'utf8');
 
   const contractFactory = new ethers.ContractFactory(abi, binary, wallet);
   console.log('Deploying please wait ........!');
+  //   const max_amount = 100000000;
 
   const contract = await contractFactory.deploy();
   //   console.log(contract);
-  //   const transactionReceipt = await contract.deployTransaction.wait(1);
-  //   console.log('here is the deployment transaction :', contract.deployTransaction);
+  //   await contract.deployTransaction.wait(1);
+  console.log('here is the deployment transaction :', contract.address);
 
   //   console.log('here is the transaction receipt :', transactionReceipt);
 
@@ -38,9 +41,9 @@ async function main() {
   //   await signedTxResponse.wait(1);
   //   console.log('this is signed transaction:', signedTxResponse);
 
-  const currentFavouriteNumber = await contract.retreive();
+  //   const currentFavouriteNumber = await contract.retreive();
 
-  console.log(currentFavouriteNumber.toString());
+  //   console.log(currentFavouriteNumber?.toString());
 
   const updateFavouriteNumber = await contract.store(6);
   let updateFavouriteNumberReciept = await updateFavouriteNumber.wait();
@@ -49,7 +52,7 @@ async function main() {
 
   const updatdFavouriteNumber = await contract.retreive();
 
-  console.log(updatdFavouriteNumber.toString());
+  console.log(updatdFavouriteNumber?.toString());
 }
 
 main()
